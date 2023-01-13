@@ -46,12 +46,25 @@ services:
     restart: unless-stopped
     ports:
       - 80:80
+      - 443:443
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/conf:/etc/nginx/ssl
+      - ./certbot/data:/var/www/html
       - ./mysite:/mysite:ro
     depends_on:
       - mysite
+    networks:
+      - app-network
+  certbot:
+    image: certbot/certbot:latest
+    platform: linux/arm64
+    command: certonly --webroot --webroot-path=/var/www/html --email admin@formen.health --agree-tos --no-eff-email -d mydomain.com -d www.mydomain.com
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/logs:/var/log/letsencrypt
+      - ./certbot/data:/var/www/html
     networks:
       - app-network
 networks:
