@@ -1,12 +1,12 @@
 version: "3"
 
 services:
-  mysite:
+  wpapp:
     image: wordpress:php7.4-fpm-alpine
     platform: linux/arm64
     restart: unless-stopped
     volumes:
-      - ./mysite:/var/www/html
+      - ./wpapp:/var/www/html
       - ./php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
     env_file:
       - .env
@@ -40,6 +40,18 @@ services:
       MYSQL_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
     networks:
       - app-network
+  phpmyadmin:
+    image: arm64v8/phpmyadmin:latest
+    environment:
+      PMA_HOST: "${WORDPRESS_DB_HOST}"
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+    ports:
+      - "8082:80"
+    depends_on:
+      - db
+    networks:
+      - app-network
   nginx:
     image: nginx:alpine
     platform: linux/arm64
@@ -52,9 +64,9 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./certbot/conf:/etc/nginx/ssl
       - ./certbot/data:/var/www/html
-      - ./mysite:/mysite:ro
+      - ./wpapp:/wpapp:ro
     depends_on:
-      - mysite
+      - wpapp
     networks:
       - app-network
   certbot:
