@@ -38,6 +38,11 @@ services:
       MYSQL_USER: "${WORDPRESS_DB_USER}"
       MYSQL_DATABASE: "${WORDPRESS_DB_NAME}"
       MYSQL_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 26677
+        hard: 46677
     networks:
       - app-network
   phpmyadmin:
